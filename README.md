@@ -19,3 +19,7 @@ sudo vim /etc/tomcat9/tomcat-users.xml
 ### Port Change 
 sudo nano /etc/tomcat9/server.xml
 change the port number 9090
+
+Clone The Hello Word AppliCation Github Code:
+-----
+git clone https://github.com/Santhosh-Nagarajan/TomcatMavenApp.git
