@@ -7,14 +7,14 @@
 --------------------------------------------------
 ## Update 
 sudo vim /etc/tomcat9/tomcat-users.xml
----
+
 <role rolename="manager-script"/>
   <role rolename="manager-gui"/>
   <role rolename="manager-jmx"/>
   <role rolename="manager-status"/>
   <role rolename="admin-gui"/>
 <user username="tomcat" password="tomcat" roles="manager-script,admin-gui,manager-gui,manager-jmx,manager-status"/>
-----
+
 ### Port Change 
 sudo nano /etc/tomcat9/server.xml
 change the port number 9090
