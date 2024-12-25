@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven'
+    }
+    parameters {
+        string(name: 'GIT_URL', defaultValue: 'https://github.com/Santhosh-Nagarajan/TomcatMavenApp.git', description: 'Git repository URL')
+        string(name: 'CREDENTIALS_ID', defaultValue: 'Santhosh-Nagarajan/******', description: 'Git credentials ID')
+        string(name: 'WAR_FILE_PATH', defaultValue: 'target/TomcatMavenApp-2.0.war', description: 'Path to the WAR file')
+        string(name: 'TOMCAT_HOST', defaultValue: 'localhost', description: 'Tomcat server host')
+        string(name: 'TOMCAT_PORT', defaultValue: '9090', description: 'Tomcat server port')
+        string(name: 'TOMCAT_USER', defaultValue: 'santhosh', description: 'Tomcat server username')
+        password(name: 'TOMCAT_PASSWORD', defaultValue: 'santhosh123', description: 'Tomcat server password')
+    }
+    stages {
+        stage ('Git-Checkout') {
+            steps {
+                cleanWs() // Clean workspace
+                git credentialsId: params.CREDENTIALS_ID, url: params.GIT_URL
+                echo "Checkout successful";
+            }
+        }
+        stage ('Build') {
+            steps {
+                sh 'mvn clean'
+                sh 'mvn package'
+                sh 'ls -l target' // List files to verify WAR file is created
+                echo "Build successful";
+            }
+        }
+        stage ('Deploy to Tomcat') {
+            steps {
+                script {
+                    def warFile = params.WAR_FILE_PATH
+                    def tomcatHost = params.TOMCAT_HOST
+                    def tomcatPort = params.TOMCAT_PORT
+                    def tomcatUser = params.TOMCAT_USER
+                    def tomcatPassword = params.TOMCAT_PASSWORD
+
+                    // Verify file existence before deployment
+                    if (fileExists(warFile)) {
+                        echo "Deploying WAR file to Tomcat Server..."
+                        sh """
+                            curl --upload-file ${warFile} \
+                            --user ${tomcatUser}:${tomcatPassword} \
+                            "http://${tomcatHost}:${tomcatPort}/manager/text/deploy?path=/TomcatMavenApp&update=true"
+                        """
+                        echo "Deployment successful!";
+                    } else {
+                        error "WAR file not found: ${warFile}. Check the build stage."
+                    }
+                }
+            }
+        }
+        stage ('Monitor') {
+            steps {
+                echo "Now you can monitor!";
+            }
+        }
+    }
+}
